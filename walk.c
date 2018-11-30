@@ -80,8 +80,8 @@ int main (int argc, char *argv[])
    
    printf("j: %d, rank: %d, processes: %d\n", j, rank, number_processes);
    fflush(stdout);
-   for (j = rank + 2; j <= 61; j += number_processes) // you might have to change 61 depending on how many folders in current you have
-   {                                                  // this range is 60 for 60 folders; don't touch the 2
+   for (j = rank + 2; j <= 61; j += number_processes) // you might have to change 61 depending on how many directories in
+   {                                                  // your current directory you have. This range is 60 for 60 directories; dont't touch the 2
       strcpy(path, "./");
       strcat(path, pathList[j]);
     
