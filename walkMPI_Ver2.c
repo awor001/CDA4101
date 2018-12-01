@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <mpi.h>
 
-
+// basePath: 
 int listDirectories (char *basePath, const int root, int *count)
 {
    int i, j, stringSize;
@@ -44,9 +44,12 @@ int listDirectories (char *basePath, const int root, int *count)
 
    for (i = 0; i < numOfFiles; i++)
       free(fileList[i]);
+   
+   free(fileList);
 
    return 0;
 }
+
 
 int main (int argc, char *argv[])
 {
@@ -65,13 +68,16 @@ int main (int argc, char *argv[])
    int numOfFiles;
    int i, j, stringSize;
   
+   // scan current directory
+   // fileList: array of all names of files and folders
    numOfFiles = scandir(".", &fileList, NULL, NULL);
    
-   
+   // rank: gives a number for each process
    MPI_Init (&argc, &argv);
    MPI_Comm_rank (MPI_COMM_WORLD, &rank);
    MPI_Comm_size (MPI_COMM_WORLD, &number_processes);
    MPI_Barrier (MPI_COMM_WORLD);
+   //starts timer
    elapsed_time = - MPI_Wtime();
 
    printf("rank: %d, processes: %d\n", rank, number_processes);
@@ -86,10 +92,14 @@ int main (int argc, char *argv[])
             strcpy(path, "./");
             strcat(path, (fileList[j] -> d_name));
     
+            //Check if its directory:
+            //fileList[j] -> d_type == DT_DIR
+            
             printf("|-%s\n", (fileList[j] -> d_name));
             fflush(stdout);
             count++;
- 
+            
+            // CALL CLASSIFY
             listDirectories(path, 0, &count);
             free(path);
          }
