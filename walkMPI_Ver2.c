@@ -44,8 +44,6 @@ int listDirectories (char *basePath, const int root, int *count)
 
    for (i = 0; i < numOfFiles; i++)
       free(fileList[i]);
-   
-   free(fileList);
 
    return 0;
 }
