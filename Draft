@@ -1,0 +1,85 @@
+
+Abstract
+
+We have programmed a parallel algorithm to traverse and map an entire folder hierarchy using Message Passing Interface (MPI) and have
+achieved very good performance in comparison to similar algorithms that run over a single CPU. Our algorithm, WalkerMPI, was implemented
+using the programming language C with MPI and is optimized to run on a Unix platform. We based our program on a python algorithm called
+os.walk that performs the same task but uses only one processor. WalkerMPI, differently from os.walk, has the ability to launch a 
+different “walker” to each directory, accelerating the process of traversing the folder hierarchy. WalkerMPI is a powerful tool that 
+can work along with file/folder finders, as well as other algorithms that work with folder hierarchy like classifiers. 
+
+Introduction
+
+The average capacity of a hard drive in 2015 was about 1TB (“Seagate average HDD capacity,” 2018). The average capacity of a hard drive 
+in 2018 is about 3TB (“Seagate average HDD capacity,” 2018). With hard drives continuously increasing, algorithms which purpose is to
+traverse folder hierarchies also require an improvement. Along with the memory increase, hardware developments have also brought to the table considerable improvements for multi-core processing, giving software developers a difficult challenge which is, at the same time, a powerful tool (Keller, 2013). WalkerMPI takes advantage of this multi-core processing paradigm and it can outperform any other similar algorithm that runs on a single core CPU.
+
+This investigation was initially motivated by the impactful performance achieved in early tests using more than one cpu at the same time. WalkerMPI was able to beat a similar walker that since the first test using only 2 CPUs. Not only did WalkerMPI continue increasing the gap between single core and multi-core when more cores were used during the tests, but also the deeper the folder hierarchies were, the larger the time difference. 
+
+Related Work
+
+    Python is a popular object oriented programing language that has a tremendous amount of useful packages and functions. One of these functions is related to this investigation, its name is os.walk(“operating system interfaces”, 2018). This function generates the file names in a directory tree by walking the tree. For each directory in the tree, os.walk yields dirpath (path of current directory), dirnames (subdirectory names except for current and previous)  and filesnames (a list of non-directory files in current directory).
+
+    A very general way of using os.walk is the following:
+import os
+from os.path import join, getsize
+for root, dirs, files in os.walk('python/Lib/email'):
+    print root
+    Aside from the programming languages these two algorithms are built with, the main difference between os.walk and WalkerMPI consists in the number of processors they use. Python’s os.walk is designed to work with a single core CPU meanwhile WalkerMPI is optimized to work with as many cores a CPU contains. 
+
+Process
+
+    This investigation was finished in two major steps: 
+Our first task was to adapt os.walk from python to C and optimized it to run on Unix. Since python and C are very different programming languages, we had to code mostly everything from the scratch. For testing and comparison purposes, we separated the process in two functions: main (where the walker is called and statistical information regarding the process is printed), and listDirectories (where the walker goes directory by directory and lists the entire directory tree).
+
+
+
+Our second task was to turn os.walk into a parallel process using MPI. We kept the two functions (main and listDirectories) and we added the MPI functionalities to the main function. Since we tried with different CPU setups from 2 to 8 cores, we allowed the program to accept command arguments and used those arguments to initialize the MPI process:
+
+
+
+After the initialization was done, we proceeded to call listDirectories for each subdirectory in the current directory:
+
+
+Finally, we printed our statistical analysis and finalized the MPI process:
+
+
+
+Results
+
+For this investigation, we performed several tests to prove the better performance of WalkerMPI against its rival os.walk. During the tests we discovered that the major factors increasing the difference in performance between these two programs are the number of cores used and the number of directories traversed. 
+We choose 3 tests for number of cores and 3 tests for number of directories. The first 3 tests were performed using WalkerMPI with 8 cores against os.walk(C version) and we ran them in 507, 1828, and 11600 directories respectively. The second 3 tests were performed using WalkerMPI with 2, 4 and 8 cores respectively against os.walk(C version) in a setup of 11600 directories. 
+For the first 3 tests we noticed a huge outperformance by WalkerMPI over os.walk. During the first test WalkerMPI was able to finish mapping 507 directories in 0.036703 seconds while os.walker took 0.086582. Considering we were using 8 cores, the difference is not as stunning as in tests 2 and 3. During the second test WalkerMPI was able to finish mapping 1828 directories in 0.076145 seconds while os.walker fell behind by finishing the same task in 0.324976 seconds. The biggest difference was observed in our third test where WalkerMPI outperformed os.walker by a factor of 6, mapping 11600 directories in 0.566612 seconds while os.walk took 3.691553 seconds.
+
+
+
+For the second 3 tests we noticed that WalkerMPI can outperform os.walk even when it is using only 2 cores. During the first test WalkerMPI was able to finish mapping 11600 directories using 2 cores in 0.960027 seconds. During the second test WalkerMPI was able to finish mapping 11600 directories using 4 cores in 0.659561 seconds. During the third test WalkerMPI was able to finish mapping 11600 directories using 4 cores in 0.566612 seconds. While os.walk fell behind in all 3 tests finishing the same task in 3.691553 seconds.
+
+
+
+
+
+
+Conclusions
+
+WalkerMPI proved once more that multi-core processing beats single core processing even simple tasks like file/folder mapping, something that is still being done with a single core in many occasions. As mentioned earlier in this paper, disk capacity continues to grow in size while processors grow in cores rather than the speed of each individual core while complying with Moore’s Law and energy efficiency standards (Ramanathan). As disk capacity grows, directory hierarchies have more chances to be bigger. At some point, traversing a big enough directory hierarchy becomes extremely slow for a single core CPU. In scenarios like this one, WalkerMPI proves to be an excellent tool capable of outperforming single core processes of the same nature. WalkerMPI, however, is not only a directory scanner; by doing very small changes to the code, it can become a file/folder finder, a file classifier, or even a file generator. Multi-core processing is the future of the actual CPU architecture. Eventually most processes performed by CPUs will run in parallel, leaving behind the single core processing era.
+
+
+
+
+
+
+References
+
+15.1. os - Miscellaneous operating system interfaces. (n.d.). Retrieved from
+https://docs.python.org/2/library/os.html
+
+Keller, R. (2013). Facing the multicore challenge III: Aspects of new paradigms and
+technologies in parallel computing. Berlin: Springer.
+
+Ramanathan, R. M. (n.d.). Intel® Multi-Core Processors: Making the Move to Quad-Core …
+Retrieved from http://bnrg.eecs.berkeley.edu/~randy/Courses/CS294.F07/IntelQuadCore.pdf
+
+Seagate average HDD capacity worldwide 2015-2018 | Statistic. (n.d.). Retrieved from
+https://www.statista.com/statistics/795748/worldwide-seagate-average-hard-disk-drive-
+capacity/
